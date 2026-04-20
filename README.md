@@ -122,7 +122,6 @@ The plugin exposes modules you can use directly:
 local notes = require("kaivim-obsidian.notes")
 notes.create_new_note()
 notes.open_scratch()
-notes.note_id()
 notes.normalize_note_title("My Note Title")
 notes.image_path("screenshot.png")
 

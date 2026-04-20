@@ -86,14 +86,6 @@ function M.normalize_note_title(title)
   return title
 end
 
---- Generates an ID for an Obsidian note.
---- @return string The generated note ID.
-function M.note_id()
-  local time = os.time()
-  local hex_time = string.format("id-%08x", time)
-  return hex_time
-end
-
 --- Returns the image path for pasting an image into the current Obsidian note.
 --- Prefixes the image name with the note's uid hex (without "id-" prefix) as a
 --- subdirectory. If the note has no uid, returns the image name as-is.
