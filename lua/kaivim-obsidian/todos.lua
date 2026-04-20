@@ -52,20 +52,31 @@ local function last_week_todo_path()
   return vault_path() .. "/" .. todo_dir() .. "/" .. todo_filename .. ".md"
 end
 
+--- Builds a set from the copyover_sections array for O(1) lookup.
+--- @return table<string, boolean>
+local function copyover_set()
+  local sections = cfg().weekly_todo.copyover_sections
+  local set = {}
+  for _, name in ipairs(sections) do
+    set[name] = true
+  end
+  return set
+end
+
 --- Extracts unchecked tasks from copyover sections of a todo file.
 --- @param file_path string The path to the todo file.
---- @return table<string, string[]> A map from section key to unchecked task lines.
+--- @return table<string, string[]> A map from heading name to unchecked task lines.
 local function extract_unchecked_tasks(file_path)
-  local copyover_sections = cfg().weekly_todo.copyover_sections
+  local sections = copyover_set()
   local result = {}
-  for _, key in pairs(copyover_sections) do
-    result[key] = {}
+  for name in pairs(sections) do
+    result[name] = {}
   end
   if vim.fn.filereadable(file_path) ~= 1 then
     return result
   end
   local lines = vim.fn.readfile(file_path)
-  local current_key = nil
+  local current_section = nil
   local section_level = nil
   local pending_headers = {}
   local in_unchecked = false
@@ -74,28 +85,28 @@ local function extract_unchecked_tasks(file_path)
     if level then
       in_unchecked = false
       local heading_text = string.match(line, "^#+%s+(.+)$")
-      if heading_text and copyover_sections[heading_text] then
-        current_key = copyover_sections[heading_text]
+      if heading_text and sections[heading_text] then
+        current_section = heading_text
         section_level = level
         pending_headers = {}
       elseif section_level and level <= section_level then
-        current_key = nil
+        current_section = nil
         section_level = nil
         pending_headers = {}
-      elseif current_key then
+      elseif current_section then
         table.insert(pending_headers, line)
       end
-    elseif current_key and string.match(line, "^%s*%- %[ %]") then
+    elseif current_section and string.match(line, "^%s*%- %[ %]") then
       for _, header in ipairs(pending_headers) do
-        table.insert(result[current_key], header)
+        table.insert(result[current_section], header)
       end
       pending_headers = {}
-      table.insert(result[current_key], line)
+      table.insert(result[current_section], line)
       in_unchecked = true
-    elseif current_key and string.match(line, "^%s*%-") then
+    elseif current_section and string.match(line, "^%s*%-") then
       in_unchecked = false
-    elseif current_key and in_unchecked and line ~= "" then
-      table.insert(result[current_key], line)
+    elseif current_section and in_unchecked and line ~= "" then
+      table.insert(result[current_section], line)
     else
       in_unchecked = false
     end
@@ -105,11 +116,11 @@ end
 
 --- Injects unchecked tasks from last week into the current todo file.
 --- @param todo_path string The path to the current todo file.
---- @param sections table<string, string[]> A map from section key to unchecked task lines.
-local function inject_unchecked_tasks(todo_path, sections)
-  local copyover_sections = cfg().weekly_todo.copyover_sections
+--- @param tasks table<string, string[]> A map from heading name to unchecked task lines.
+local function inject_unchecked_tasks(todo_path, tasks)
+  local sections = copyover_set()
   local has_any = false
-  for _, items in pairs(sections) do
+  for _, items in pairs(tasks) do
     if #items > 0 then
       has_any = true
       break
@@ -121,22 +132,22 @@ local function inject_unchecked_tasks(todo_path, sections)
   local lines = vim.fn.readfile(todo_path)
 
   local stripped = {}
-  local current_key = nil
+  local current_section = nil
   local section_level = nil
   for _, line in ipairs(lines) do
     local level = heading_level(line)
     if level then
       local heading_text = string.match(line, "^#+%s+(.+)$")
-      if heading_text and copyover_sections[heading_text] then
-        current_key = copyover_sections[heading_text]
+      if heading_text and sections[heading_text] then
+        current_section = heading_text
         section_level = level
       elseif section_level and level <= section_level then
-        current_key = nil
+        current_section = nil
         section_level = nil
       end
     end
     local is_placeholder = string.match(line, "^%- %[ %]%s*$")
-    local strip = is_placeholder and current_key and #sections[current_key] > 0
+    local strip = is_placeholder and current_section and #tasks[current_section] > 0
     if not strip then
       table.insert(stripped, line)
     end
@@ -147,9 +158,8 @@ local function inject_unchecked_tasks(todo_path, sections)
   for _, line in ipairs(stripped) do
     table.insert(new_lines, line)
     local heading_text = string.match(line, "^#+%s+(.+)$")
-    local key = heading_text and copyover_sections[heading_text]
-    if key and #sections[key] > 0 then
-      for _, task in ipairs(sections[key]) do
+    if heading_text and sections[heading_text] and #tasks[heading_text] > 0 then
+      for _, task in ipairs(tasks[heading_text]) do
         table.insert(new_lines, task)
       end
       injected = true

@@ -50,11 +50,7 @@ require("kaivim-obsidian").setup({
     -- Template name used when creating a new weekly todo
     template = "weekly-todo-tmpl",
     -- Heading names whose unchecked tasks carry over to the next week.
-    -- Keys are the heading text, values are internal keys.
-    copyover_sections = {
-      Tasks = "tasks",
-      Backlog = "backlog",
-    },
+    copyover_sections = { "Tasks", "Backlog" },
   },
 
   -- Maps template names (without .md) to vault subdirectories. Unmapped

@@ -12,7 +12,7 @@ local M = {}
 
 --- @class KaiVimObsidianWeeklyTodoConfig
 --- @field template string Template name for new weekly todos
---- @field copyover_sections table<string, string> Heading text → key for sections whose unchecked tasks carry over
+--- @field copyover_sections string[] Heading names whose unchecked tasks carry over to the next week
 
 --- @class KaiVimObsidianKeymapConfig
 --- @field groups table[] Which-key groups for obsidian
@@ -24,10 +24,7 @@ M.config = {
   vault_path = "~/Documents/obsidian",
   weekly_todo = {
     template = "weekly-todo-tmpl",
-    copyover_sections = {
-      Tasks = "tasks",
-      Backlog = "backlog",
-    },
+    copyover_sections = { "Tasks", "Backlog" },
   },
   template_output_dirs = {
     ["weekly-todo-tmpl"] = "todos",
