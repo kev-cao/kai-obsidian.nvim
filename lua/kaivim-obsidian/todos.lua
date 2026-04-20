@@ -21,6 +21,14 @@ local function heading_level(line)
   return hashes and #hashes or nil
 end
 
+--- Returns the subdirectory for weekly todos, resolved from template_output_dirs
+--- using the weekly todo template name.
+--- @return string
+local function todo_dir()
+  local config = cfg()
+  return config.template_output_dirs[config.weekly_todo.template] or "todos"
+end
+
 --- Computes the file path for the weekly todo note for a given date.
 --- @param date string The date in "YYYY-MM-DD" format.
 --- @return string The file path for the weekly todo note.
@@ -32,7 +40,7 @@ local function weekly_todo_path(date)
   local time = os.time({ year = year, month = month, day = day })
   local week = tostring(os.date("%Yw%V", time))
   local todo_filename = "todo-weekly-" .. week
-  return vault_path() .. "/" .. cfg().weekly_todo.dir .. "/" .. todo_filename .. ".md"
+  return vault_path() .. "/" .. todo_dir() .. "/" .. todo_filename .. ".md"
 end
 
 --- Computes the file path for last week's todo note.
@@ -41,7 +49,7 @@ local function last_week_todo_path()
   local one_week_ago = os.time() - (7 * 24 * 60 * 60)
   local week = tostring(os.date("%Yw%V", one_week_ago))
   local todo_filename = "todo-weekly-" .. week
-  return vault_path() .. "/" .. cfg().weekly_todo.dir .. "/" .. todo_filename .. ".md"
+  return vault_path() .. "/" .. todo_dir() .. "/" .. todo_filename .. ".md"
 end
 
 --- Extracts unchecked tasks from copyover sections of a todo file.
@@ -159,8 +167,8 @@ function M.goto_or_create_weekly()
   local obsidian = require("obsidian")
   local config = cfg()
   local todo_filename = "todo-weekly-" .. os.date("%Yw%V")
-  local todo_dir = vault_path() .. "/" .. config.weekly_todo.dir .. "/"
-  local todo_path = todo_dir .. todo_filename .. ".md"
+  local dir = vault_path() .. "/" .. todo_dir() .. "/"
+  local todo_path = dir .. todo_filename .. ".md"
   if vim.fn.filereadable(todo_path) == 1 then
     local note = obsidian.Note.from_file(todo_path)
     note:open({ sync = false })
@@ -172,7 +180,7 @@ function M.goto_or_create_weekly()
       id = todo_filename,
       title = todo_filename,
       verbatim = true,
-      dir = todo_dir,
+      dir = dir,
       should_write = true,
       insert_frontmatter = false,
       template = config.weekly_todo.template,
@@ -191,8 +199,7 @@ end
 function M.list_weekly()
   local date_util = require("kaivim-obsidian.date")
   local obsidian = require("obsidian")
-  local config = cfg()
-  local todos_path = vault_path() .. "/" .. config.weekly_todo.dir .. "/"
+  local todos_path = vault_path() .. "/" .. todo_dir() .. "/"
   local dates = {}
   local date_to_file = {}
   for _, file in ipairs(vim.fn.globpath(

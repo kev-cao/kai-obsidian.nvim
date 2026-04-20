@@ -7,18 +7,12 @@ local M = {}
 --- @class KaiVimObsidianConfig
 --- @field vault_path string Path to the Obsidian vault
 --- @field weekly_todo KaiVimObsidianWeeklyTodoConfig
---- @field templates KaiVimObsidianTemplateConfig
+--- @field template_output_dirs table<string, string|userdata> Maps template names (without .md) to vault subdirectories. Set to vim.NIL to prompt for directory.
 --- @field keymaps KaiVimObsidianKeymapConfig
 
 --- @class KaiVimObsidianWeeklyTodoConfig
---- @field dir string Subdirectory within the vault for weekly todos
 --- @field template string Template name for new weekly todos
 --- @field copyover_sections table<string, string> Heading text → key for sections whose unchecked tasks carry over
-
---- @class KaiVimObsidianTemplateConfig
---- @field folder string Subdirectory within the vault for templates
---- @field date_format string
---- @field time_format string
 
 --- @class KaiVimObsidianKeymapConfig
 --- @field groups table[] Which-key groups for obsidian
@@ -29,17 +23,17 @@ local M = {}
 M.config = {
   vault_path = "~/Documents/obsidian",
   weekly_todo = {
-    dir = "todos",
     template = "weekly-todo-tmpl",
     copyover_sections = {
       Tasks = "tasks",
       Backlog = "backlog",
     },
   },
-  templates = {
-    folder = "nvim-templates",
-    date_format = "%Y-%m-%d",
-    time_format = "%H:%M",
+  template_output_dirs = {
+    ["weekly-todo-tmpl"] = "todos",
+    ["people-tmpl"] = "people",
+    ["project-tmpl"] = "projects",
+    ["category-tmpl"] = "categories",
   },
   keymaps = {
     groups = {

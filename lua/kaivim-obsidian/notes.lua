@@ -179,10 +179,21 @@ function M.create_new_note(opts)
     elseif template == "" then
       template = nil
     end
-    local dir, _ = query_dir_async(obsidian_path)
-    if dir == nil then
-      abort()
-      return
+
+    local dir
+    local output_dirs = plugin.config.template_output_dirs
+    local mapped_dir = template and output_dirs[template]
+    if mapped_dir == vim.NIL then
+      -- Explicitly mapped to vim.NIL: prompt user for directory
+      dir, _ = query_dir_async(obsidian_path)
+      if dir == nil then
+        abort()
+        return
+      end
+    elseif mapped_dir then
+      dir = obsidian_path .. "/" .. mapped_dir
+    else
+      dir = obsidian_path
     end
     local title = nil
     vim.ui.input({ prompt = "Note name: " }, function(input)

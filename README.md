@@ -47,8 +47,6 @@ require("kaivim-obsidian").setup({
 
   -- Weekly todo settings
   weekly_todo = {
-    -- Subdirectory within the vault for weekly todo files
-    dir = "todos",
     -- Template name used when creating a new weekly todo
     template = "weekly-todo-tmpl",
     -- Heading names whose unchecked tasks carry over to the next week.
@@ -59,19 +57,15 @@ require("kaivim-obsidian").setup({
     },
   },
 
-  -- Template settings (passed through to obsidian.nvim)
-  templates = {
-    folder = "nvim-templates",
-    date_format = "%Y-%m-%d",
-    time_format = "%H:%M",
-  },
-
-  -- Frontmatter settings (passed through to obsidian.nvim)
-  frontmatter = {
-    -- Function or boolean controlling whether frontmatter is added to notes
-    enabled = function(path)
-      return not string.match(path, "%.claude/")
-    end,
+  -- Maps template names (without .md) to vault subdirectories. Unmapped
+  -- templates default to the vault root. Set a template to vim.NIL to
+  -- prompt the user for a directory instead.
+  template_output_dirs = {
+    ["weekly-todo-tmpl"] = "todos",
+    ["people-tmpl"] = "people",
+    ["project-tmpl"] = "projects",
+    ["category-tmpl"] = "categories",
+    -- ["some-tmpl"] = vim.NIL,  -- prompts for directory
   },
 
   -- Keymap configuration. Keys are named so individual entries can be
