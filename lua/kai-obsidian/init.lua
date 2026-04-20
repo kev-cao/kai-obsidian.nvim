@@ -1,24 +1,24 @@
---- @module "kaivim-obsidian"
+--- @module "kai-obsidian"
 --- A lazy.nvim plugin for managing Obsidian notes with opinionated workflows
 --- for note creation, weekly todos, and vault navigation.
 
 local M = {}
 
---- @class KaiVimObsidianConfig
---- @field weekly_todo KaiVimObsidianWeeklyTodoConfig
+--- @class KaiObsidianConfig
+--- @field weekly_todo KaiObsidianWeeklyTodoConfig
 --- @field template_output_dirs table<string, string|userdata> Maps template names (without .md) to vault subdirectories. Set to vim.NIL to prompt for directory.
---- @field keymaps KaiVimObsidianKeymapConfig
+--- @field keymaps KaiObsidianKeymapConfig
 
---- @class KaiVimObsidianWeeklyTodoConfig
+--- @class KaiObsidianWeeklyTodoConfig
 --- @field template string Template name for new weekly todos
 --- @field copyover_sections string[] Heading names whose unchecked tasks carry over to the next week
 
---- @class KaiVimObsidianKeymapConfig
+--- @class KaiObsidianKeymapConfig
 --- @field groups table[] Which-key groups for obsidian
 --- @field keys table<string, table|false> Global keymaps (set to false to disable)
 --- @field bufkeys table<string, table|false> Buffer-local keymaps for obsidian markdown files (set to false to disable)
 
---- @type KaiVimObsidianConfig
+--- @type KaiObsidianConfig
 M.config = {
   weekly_todo = {
     template = "weekly-todo-tmpl",
@@ -38,25 +38,25 @@ M.config = {
     keys = {
       open_scratch = {
         "<leader>os",
-        function() require("kaivim-obsidian.notes").open_scratch() end,
+        function() require("kai-obsidian.notes").open_scratch() end,
         mode = "n",
         desc = "Open Obsidian scratchpad",
       },
       new_note = {
         "<leader>on",
-        function() require("kaivim-obsidian.notes").create_new_note() end,
+        function() require("kai-obsidian.notes").create_new_note() end,
         mode = "n",
         desc = "Create a new Obsidian note",
       },
       weekly_todo = {
         "<leader>ott",
-        function() require("kaivim-obsidian.todos").goto_or_create_weekly() end,
+        function() require("kai-obsidian.todos").goto_or_create_weekly() end,
         mode = "n",
         desc = "Go to weekly todo",
       },
       list_weekly = {
         "<leader>otl",
-        function() require("kaivim-obsidian.todos").list_weekly() end,
+        function() require("kai-obsidian.todos").list_weekly() end,
         mode = "n",
         desc = "List weekly todos",
       },
@@ -67,7 +67,7 @@ M.config = {
         function()
           vim.ui.input({ prompt = "Image name: " }, function(input)
             if input then
-              local notes = require("kaivim-obsidian.notes")
+              local notes = require("kai-obsidian.notes")
               vim.cmd("Obsidian paste_img " .. notes.image_path(input))
             end
           end)
@@ -86,7 +86,7 @@ function M.vault_path()
   return tostring(Obsidian.dir)
 end
 
---- @param opts? KaiVimObsidianConfig
+--- @param opts? KaiObsidianConfig
 function M.setup(opts)
   M.config = vim.tbl_deep_extend("force", M.config, opts or {})
 
@@ -108,12 +108,12 @@ function M.setup(opts)
   -- Set up buffer-local keymaps for obsidian vault markdown files
   vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     pattern = M.vault_path() .. "/*.md",
-    group = vim.api.nvim_create_augroup("kaivim_obsidian", { clear = true }),
+    group = vim.api.nvim_create_augroup("kai_obsidian", { clear = true }),
     callback = function()
       for _, map in pairs(M.config.keymaps.bufkeys) do
         if map then
           if wk_ok then
-            local func = require("kaivim-obsidian.func")
+            local func = require("kai-obsidian.func")
             wk.add(func.make_buflocal({ map }))
           else
             vim.keymap.set(map.mode, map[1], map[2], {

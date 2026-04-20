@@ -1,4 +1,4 @@
-# kaivim-obsidian
+# kai-obsidian.nvim
 
 A Neovim plugin that extends [obsidian.nvim](https://github.com/obsidian-nvim/obsidian.nvim) with opinionated workflows for note creation, weekly todos, and vault navigation.
 
@@ -22,7 +22,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
 {
-  "kev-cao/kaivim-obsidian",
+  "kev-cao/kai-obsidian.nvim",
   dependencies = {
     "obsidian-nvim/obsidian.nvim",
     "nvim-lua/plenary.nvim",
@@ -39,7 +39,7 @@ You still need to configure `obsidian.nvim` separately in your own plugin specs 
 All options and their defaults:
 
 ```lua
-require("kaivim-obsidian").setup({
+require("kai-obsidian").setup({
   -- Weekly todo settings
   weekly_todo = {
     -- Template name used when creating a new weekly todo
@@ -119,23 +119,23 @@ The plugin exposes modules you can use directly:
 
 ```lua
 -- Note utilities
-local notes = require("kaivim-obsidian.notes")
+local notes = require("kai-obsidian.notes")
 notes.create_new_note()
 notes.open_scratch()
 notes.normalize_note_title("My Note Title")
 notes.image_path("screenshot.png")
 
 -- Weekly todos
-local todos = require("kaivim-obsidian.todos")
+local todos = require("kai-obsidian.todos")
 todos.goto_or_create_weekly()
 todos.list_weekly()
 
 -- Date utilities
-local date = require("kaivim-obsidian.date")
+local date = require("kai-obsidian.date")
 date.week_to_date(2026, 16, "%Y-%m-%d")
 
 -- Plugin config and vault path
-local plugin = require("kaivim-obsidian")
+local plugin = require("kai-obsidian")
 plugin.vault_path()  -- returns vault path from obsidian.nvim
 plugin.config        -- current config table
 ```

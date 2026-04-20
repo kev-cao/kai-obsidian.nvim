@@ -1,4 +1,4 @@
---- @module "kaivim-obsidian.func"
+--- @module "kai-obsidian.func"
 --- Small utility functions used by the plugin.
 
 local M = {}

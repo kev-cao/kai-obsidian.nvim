@@ -1,16 +1,16 @@
---- @module "kaivim-obsidian.todos"
+--- @module "kai-obsidian.todos"
 --- Weekly todo management for Obsidian vaults.
 
 local M = {}
 
 --- @return table The plugin config
 local function cfg()
-  return require("kaivim-obsidian").config
+  return require("kai-obsidian").config
 end
 
 --- @return string The expanded vault path
 local function vault_path()
-  return require("kaivim-obsidian").vault_path()
+  return require("kai-obsidian").vault_path()
 end
 
 --- Returns the heading level of a line, or nil if not a heading.
@@ -207,7 +207,7 @@ end
 
 --- Lists all weekly todos in a Fzf picker.
 function M.list_weekly()
-  local date_util = require("kaivim-obsidian.date")
+  local date_util = require("kai-obsidian.date")
   local obsidian = require("obsidian")
   local todos_path = vault_path() .. "/" .. todo_dir() .. "/"
   local dates = {}

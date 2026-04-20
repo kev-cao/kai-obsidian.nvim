@@ -1,4 +1,4 @@
---- @module "kaivim-obsidian.notes"
+--- @module "kai-obsidian.notes"
 --- Note creation, directory querying, and vault navigation utilities.
 
 local M = {}
@@ -152,7 +152,7 @@ end
 --- Creates a new Obsidian note, prompting the user for the directory and title.
 --- @param opts? table Options for creating the note.
 function M.create_new_note(opts)
-  local plugin = require("kaivim-obsidian")
+  local plugin = require("kai-obsidian")
   local obsidian = require("obsidian")
   local obsidian_path = plugin.vault_path()
   local abort = function()
@@ -225,7 +225,7 @@ end
 
 --- Opens the scratch note in the Obsidian vault.
 function M.open_scratch()
-  local plugin = require("kaivim-obsidian")
+  local plugin = require("kai-obsidian")
   local obsidian = require("obsidian")
   local vault_path = plugin.vault_path()
   local scratch_path = vault_path .. "/scratch.md"

@@ -1,4 +1,4 @@
---- @module "kaivim-obsidian.date"
+--- @module "kai-obsidian.date"
 --- Date and time utility functions.
 
 local M = {}
