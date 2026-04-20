@@ -74,18 +74,25 @@ require("kaivim-obsidian").setup({
     end,
   },
 
-  -- Keymap configuration. Provide your own tables to override defaults.
-  -- Set to a non-empty table to replace the defaults entirely.
+  -- Keymap configuration. Keys are named so individual entries can be
+  -- overridden or disabled (set to false) via opts.
   keymaps = {
     -- Which-key groups
     groups = {
       { "<leader>o", group = "Obsidian", icon = { icon = "󱓧", color = "green" } },
       { "<leader>ot", group = "Weekly Todos", icon = { icon = "", color = "green" } },
     },
-    -- Global keymaps (empty = use defaults)
-    keys = {},
-    -- Buffer-local keymaps for vault markdown files (empty = use defaults)
-    bufkeys = {},
+    -- Global keymaps
+    keys = {
+      open_scratch = { "<leader>os", ... },
+      new_note     = { "<leader>on", ... },
+      weekly_todo  = { "<leader>ott", ... },
+      list_weekly  = { "<leader>otl", ... },
+    },
+    -- Buffer-local keymaps for vault markdown files
+    bufkeys = {
+      paste_img = { "<localleader>pi", ... },
+    },
   },
 })
 ```
@@ -107,7 +114,19 @@ require("kaivim-obsidian").setup({
 |-----|-------------|
 | `<localleader>pi` | Paste image from clipboard |
 
-To override keymaps, provide your own `keys` or `bufkeys` tables in the config. The defaults are only used when these tables are empty.
+To override a specific keymap, provide an entry with the same name in your
+opts. To disable a keymap, set it to `false`:
+
+```lua
+opts = {
+  keymaps = {
+    keys = {
+      open_scratch = { "<leader>ns", ... },  -- remap
+      list_weekly = false,                    -- disable
+    },
+  },
+},
+```
 
 ## API
 

@@ -8,7 +8,6 @@ local M = {}
 --- @field vault_path string Path to the Obsidian vault
 --- @field weekly_todo KaiVimObsidianWeeklyTodoConfig
 --- @field templates KaiVimObsidianTemplateConfig
---- @field frontmatter KaiVimObsidianFrontmatterConfig
 --- @field keymaps KaiVimObsidianKeymapConfig
 
 --- @class KaiVimObsidianWeeklyTodoConfig
@@ -21,13 +20,10 @@ local M = {}
 --- @field date_format string
 --- @field time_format string
 
---- @class KaiVimObsidianFrontmatterConfig
---- @field enabled (fun(path: string): boolean)|boolean
-
 --- @class KaiVimObsidianKeymapConfig
 --- @field groups table[] Which-key groups for obsidian
---- @field keys table[] Global keymaps
---- @field bufkeys table[] Buffer-local keymaps for obsidian markdown files
+--- @field keys table<string, table|false> Global keymaps (set to false to disable)
+--- @field bufkeys table<string, table|false> Buffer-local keymaps for obsidian markdown files (set to false to disable)
 
 --- @type KaiVimObsidianConfig
 M.config = {
@@ -45,18 +41,52 @@ M.config = {
     date_format = "%Y-%m-%d",
     time_format = "%H:%M",
   },
-  frontmatter = {
-    enabled = function(path)
-      return not string.match(path, "%.claude/")
-    end,
-  },
   keymaps = {
     groups = {
       { "<leader>o", group = "Obsidian", icon = { icon = "󱓧", color = "green" } },
       { "<leader>ot", group = "Weekly Todos", icon = { icon = "", color = "green" } },
     },
-    keys = {},
-    bufkeys = {},
+    keys = {
+      open_scratch = {
+        "<leader>os",
+        function() require("kaivim-obsidian.notes").open_scratch() end,
+        mode = "n",
+        desc = "Open Obsidian scratchpad",
+      },
+      new_note = {
+        "<leader>on",
+        function() require("kaivim-obsidian.notes").create_new_note() end,
+        mode = "n",
+        desc = "Create a new Obsidian note",
+      },
+      weekly_todo = {
+        "<leader>ott",
+        function() require("kaivim-obsidian.todos").goto_or_create_weekly() end,
+        mode = "n",
+        desc = "Go to weekly todo",
+      },
+      list_weekly = {
+        "<leader>otl",
+        function() require("kaivim-obsidian.todos").list_weekly() end,
+        mode = "n",
+        desc = "List weekly todos",
+      },
+    },
+    bufkeys = {
+      paste_img = {
+        "<localleader>pi",
+        function()
+          vim.ui.input({ prompt = "Image name: " }, function(input)
+            if input then
+              local notes = require("kaivim-obsidian.notes")
+              vim.cmd("Obsidian paste_img " .. notes.image_path(input))
+            end
+          end)
+        end,
+        mode = "n",
+        desc = "Paste image from clipboard into Obsidian vault",
+      },
+    },
   },
 }
 
@@ -70,16 +100,6 @@ end
 function M.setup(opts)
   M.config = vim.tbl_deep_extend("force", M.config, opts or {})
 
-  local default_keymaps = require("kaivim-obsidian.keymaps")
-
-  if vim.tbl_isempty(M.config.keymaps.keys) then
-    M.config.keymaps.keys = default_keymaps.default_keys()
-  end
-
-  if vim.tbl_isempty(M.config.keymaps.bufkeys) then
-    M.config.keymaps.bufkeys = default_keymaps.default_bufkeys()
-  end
-
   -- Set up which-key groups if which-key is available
   local wk_ok, wk = pcall(require, "which-key")
   if wk_ok then
@@ -87,10 +107,12 @@ function M.setup(opts)
   end
 
   -- Register global keymaps
-  for _, map in ipairs(M.config.keymaps.keys) do
-    vim.keymap.set(map.mode, map[1], map[2], {
-      desc = map.desc,
-    })
+  for _, map in pairs(M.config.keymaps.keys) do
+    if map then
+      vim.keymap.set(map.mode, map[1], map[2], {
+        desc = map.desc,
+      })
+    end
   end
 
   -- Set up buffer-local keymaps for obsidian vault markdown files
@@ -106,15 +128,17 @@ function M.setup(opts)
 
       vim.cmd("setlocal textwidth=100")
 
-      if wk_ok then
-        local func = require("kaivim-obsidian.func")
-        wk.add(func.make_buflocal(M.config.keymaps.bufkeys))
-      else
-        for _, map in ipairs(M.config.keymaps.bufkeys) do
-          vim.keymap.set(map.mode, map[1], map[2], {
-            buffer = 0,
-            desc = map.desc,
-          })
+      for _, map in pairs(M.config.keymaps.bufkeys) do
+        if map then
+          if wk_ok then
+            local func = require("kaivim-obsidian.func")
+            wk.add(func.make_buflocal({ map }))
+          else
+            vim.keymap.set(map.mode, map[1], map[2], {
+              buffer = 0,
+              desc = map.desc,
+            })
+          end
         end
       end
     end,
