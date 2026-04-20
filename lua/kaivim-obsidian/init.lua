@@ -5,7 +5,6 @@
 local M = {}
 
 --- @class KaiVimObsidianConfig
---- @field vault_path string Path to the Obsidian vault
 --- @field weekly_todo KaiVimObsidianWeeklyTodoConfig
 --- @field template_output_dirs table<string, string|userdata> Maps template names (without .md) to vault subdirectories. Set to vim.NIL to prompt for directory.
 --- @field keymaps KaiVimObsidianKeymapConfig
@@ -21,7 +20,6 @@ local M = {}
 
 --- @type KaiVimObsidianConfig
 M.config = {
-  vault_path = "~/Documents/obsidian",
   weekly_todo = {
     template = "weekly-todo-tmpl",
     copyover_sections = { "Tasks", "Backlog" },
@@ -81,10 +79,11 @@ M.config = {
   },
 }
 
---- Returns the canonical expanded path to the Obsidian vault.
+--- Returns the canonical expanded path to the Obsidian vault, read from
+--- obsidian.nvim's global state.
 --- @return string
 function M.vault_path()
-  return vim.fn.expand(M.config.vault_path)
+  return tostring(Obsidian.dir)
 end
 
 --- @param opts? KaiVimObsidianConfig
@@ -111,14 +110,6 @@ function M.setup(opts)
     pattern = M.vault_path() .. "/*.md",
     group = vim.api.nvim_create_augroup("kaivim_obsidian", { clear = true }),
     callback = function()
-      local curr_file = vim.fn.expand("%:p")
-      -- Skip claude prompt buffers
-      if curr_file:match("claude%-prompt%-") then
-        return
-      end
-
-      vim.cmd("setlocal textwidth=100")
-
       for _, map in pairs(M.config.keymaps.bufkeys) do
         if map then
           if wk_ok then

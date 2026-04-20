@@ -12,7 +12,7 @@ A Neovim plugin that extends [obsidian.nvim](https://github.com/obsidian-nvim/ob
 ## Requirements
 
 - Neovim >= 0.9
-- [obsidian.nvim](https://github.com/obsidian-nvim/obsidian.nvim)
+- [obsidian.nvim](https://github.com/obsidian-nvim/obsidian.nvim) (must be configured with at least one workspace)
 - [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 - [fzf-lua](https://github.com/ibhagwan/fzf-lua) (for weekly todo listing)
 
@@ -28,9 +28,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
     "nvim-lua/plenary.nvim",
     "ibhagwan/fzf-lua",
   },
-  opts = {
-    vault_path = "~/Documents/obsidian",
-  },
+  opts = {},
 },
 ```
 
@@ -42,9 +40,6 @@ All options and their defaults:
 
 ```lua
 require("kaivim-obsidian").setup({
-  -- Path to your Obsidian vault
-  vault_path = "~/Documents/obsidian",
-
   -- Weekly todo settings
   weekly_todo = {
     -- Template name used when creating a new weekly todo
@@ -142,6 +137,6 @@ date.week_to_date(2026, 16, "%Y-%m-%d")
 
 -- Plugin config and vault path
 local plugin = require("kaivim-obsidian")
-plugin.vault_path()  -- returns expanded path
+plugin.vault_path()  -- returns vault path from obsidian.nvim
 plugin.config        -- current config table
 ```
