@@ -199,12 +199,17 @@ function M.create_new_note(opts)
     end
     local normalized_title = M.normalize_note_title(title)
 
-    local choice = vim.fn.confirm("Add timestamp to title?", "&Yes\n&No\n&Cancel", 3)
-    if choice == 3 then
-      abort()
-      return
-    elseif choice == 1 then
+    local ts_mode = template and plugin.config.timestamp_templates[template]
+    if ts_mode == "auto" then
       normalized_title = M.suffix_title_ts(normalized_title)
+    elseif ts_mode == "query" then
+      local choice = vim.fn.confirm("Add timestamp to title?", "&Yes\n&No\n&Cancel", 3)
+      if choice == 3 then
+        abort()
+        return
+      elseif choice == 1 then
+        normalized_title = M.suffix_title_ts(normalized_title)
+      end
     end
 
     local create_opts = {

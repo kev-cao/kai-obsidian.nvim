@@ -7,6 +7,7 @@ local M = {}
 --- @class KaiObsidianConfig
 --- @field weekly_todo KaiObsidianWeeklyTodoConfig
 --- @field template_output_dirs table<string, string|userdata> Maps template names (without .md) to vault subdirectories. Set to vim.NIL to prompt for directory.
+--- @field timestamp_templates table<string, "query"|"auto"> Maps template names (without .md) to timestamp behavior: "query" prompts the user, "auto" always suffixes.
 --- @field keymaps KaiObsidianKeymapConfig
 
 --- @class KaiObsidianWeeklyTodoConfig
@@ -29,6 +30,9 @@ M.config = {
     ["people-tmpl"] = "people",
     ["project-tmpl"] = "projects",
     ["category-tmpl"] = "categories",
+  },
+  timestamp_templates = {
+    ["meeting-tmpl"] = "query",
   },
   keymaps = {
     groups = {

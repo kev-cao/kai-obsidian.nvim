@@ -59,6 +59,12 @@ require("kai-obsidian").setup({
     -- ["some-tmpl"] = vim.NIL,  -- prompts for directory
   },
 
+  -- Maps template names (without .md) to timestamp behavior:
+  -- "query" prompts the user, "auto" always suffixes.
+  timestamp_templates = {
+    ["meeting-tmpl"] = "query",
+  },
+
   -- Keymap configuration. Keys are named so individual entries can be
   -- overridden or disabled (set to false) via opts.
   keymaps = {
