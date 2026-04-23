@@ -112,15 +112,15 @@ function M.setup(opts)
   -- Set up buffer-local keymaps for obsidian vault markdown files
   local vault = M.vault_path()
 
-  local function apply_bufkeys()
+  local function apply_bufkeys(bufnr)
     for _, map in pairs(M.config.keymaps.bufkeys) do
       if map then
         if wk_ok then
           local func = require("kai-obsidian.func")
-          wk.add(func.make_buflocal({ map }))
+          wk.add(func.make_buflocal({ map }, bufnr))
         else
           vim.keymap.set(map.mode, map[1], map[2], {
-            buffer = 0,
+            buffer = bufnr,
             desc = map.desc,
           })
         end
@@ -129,16 +129,18 @@ function M.setup(opts)
   end
 
   vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-    pattern = vault .. "/**/*.md",
+    pattern = { vault .. "/*.md", vault .. "/**/*.md" },
     group = vim.api.nvim_create_augroup("kai_obsidian", { clear = true }),
-    callback = apply_bufkeys,
+    callback = function(ev)
+      apply_bufkeys(ev.buf)
+    end,
   })
 
   -- Apply to any already-open vault buffers (setup may run after BufRead)
   for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
     local name = vim.api.nvim_buf_get_name(bufnr)
     if vim.api.nvim_buf_is_loaded(bufnr) and name:find(vault, 1, true) == 1 and name:match("%.md$") then
-      vim.api.nvim_buf_call(bufnr, apply_bufkeys)
+      apply_bufkeys(bufnr)
     end
   end
 end

@@ -3,14 +3,15 @@
 
 local M = {}
 
---- Creates a new which-key spec with the buffer option set to true.
+--- Creates a new which-key spec with the buffer option set.
 --- @param specs table A list of which-key specs.
---- @return table A new list of which-key specs with the buffer option set to true.
-function M.make_buflocal(specs)
+--- @param bufnr? number Buffer number (defaults to current buffer).
+--- @return table A new list of which-key specs with the buffer option set.
+function M.make_buflocal(specs, bufnr)
   local ret = {}
   for _, spec in ipairs(specs) do
     spec = vim.deepcopy(spec)
-    spec.buffer = true
+    spec.buffer = bufnr or true
     table.insert(ret, spec)
   end
   return ret
