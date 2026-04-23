@@ -111,7 +111,7 @@ function M.setup(opts)
 
   -- Set up buffer-local keymaps for obsidian vault markdown files
   vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-    pattern = M.vault_path() .. "/*.md",
+    pattern = M.vault_path() .. "/**/*.md",
     group = vim.api.nvim_create_augroup("kai_obsidian", { clear = true }),
     callback = function()
       for _, map in pairs(M.config.keymaps.bufkeys) do
