@@ -68,7 +68,14 @@ M.config = {
           local first_day_time = current_time - (days_to_subtract * seconds_in_day)
           return os.date("%B %-e, %Y", first_day_time)
         end,
+        day = function() return os.date("%A, %B %-e, %Y") end,
       },
+    },
+    daily_notes = {
+      folder = "dailies",
+      date_format = "[daily-]YYYY-MM-DD",
+      default_tags = {},
+      template = "daily-tmpl",
     },
     completion = { min_chars = 0 },
     checkbox = {
@@ -108,13 +115,13 @@ M.config = {
         desc = "Create a new Obsidian note",
       },
       weekly = {
-        "<leader>ott",
+        "<leader>oww",
         function() require("kai-obsidian.weekly").goto_or_create_weekly() end,
         mode = "n",
         desc = "Go to weekly note",
       },
       list_weekly = {
-        "<leader>otl",
+        "<leader>owl",
         function() require("kai-obsidian.weekly").list_weekly() end,
         mode = "n",
         desc = "List weekly notes",
