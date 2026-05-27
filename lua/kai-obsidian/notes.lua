@@ -71,6 +71,14 @@ local function query_template(cb)
   end)
 end
 
+--- Generates a unique-ish note id of the form "id-XXXXXXXX" using the current
+--- unix time as an 8-char lowercase hex string. Used as the default `uid` for
+--- frontmatter and as the `id` substitution for templates.
+--- @return string
+function M.note_id()
+  return string.format("id-%08x", os.time())
+end
+
 --- Normalizes an Obsidian note title to be a valid file name.
 --- @param title string|nil The title of the note.
 --- @return string The normalized note title.

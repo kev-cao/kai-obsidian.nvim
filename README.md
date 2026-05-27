@@ -32,7 +32,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 },
 ```
 
-You still need to configure `obsidian.nvim` separately in your own plugin specs — this plugin does not manage the obsidian.nvim setup for you.
+`kai-obsidian` calls `require("obsidian").setup(...)` for you with sensible defaults. You do not need to declare or configure `obsidian.nvim` as a separate plugin spec. To customize obsidian.nvim, pass options under the `obsidian` key — they're merged into the defaults with `vim.tbl_deep_extend("force", ...)`.
 
 ## Configuration
 
@@ -40,6 +40,29 @@ All options and their defaults:
 
 ```lua
 require("kai-obsidian").setup({
+  -- Options passed through to obsidian.nvim's setup(). The defaults below
+  -- are merged with any overrides you provide here.
+  obsidian = {
+    legacy_commands = false,
+    workspaces = {
+      { name = "obsidian", path = vim.fn.expand("~/Documents/obsidian") },
+    },
+    picker = {
+      name = "fzf-lua",
+      note_mappings = { new = "<C-n>", insert_link = "<C-l>" },
+    },
+    attachments = { folder = "attachments" },
+    frontmatter = { --[[ generates uid, aliases, categories, tags ]] },
+    templates = {
+      folder = "nvim-templates",
+      date_format = "%Y-%m-%d",
+      time_format = "%H:%M",
+      substitutions = { --[[ id, today_week, week_start_date ]] },
+    },
+    completion = { min_chars = 0 },
+    checkbox = { order = { " ", "x", "!", ">", "~" } },
+  },
+
   -- Weekly note settings
   weekly = {
     -- Template name used when creating a new weekly note

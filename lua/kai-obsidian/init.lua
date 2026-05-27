@@ -5,6 +5,7 @@
 local M = {}
 
 --- @class KaiObsidianConfig
+--- @field obsidian table Options passed through to obsidian.nvim's setup(). Merged into defaults via vim.tbl_deep_extend("force", ...).
 --- @field weekly KaiObsidianWeeklyConfig
 --- @field template_output_dirs table<string, string|userdata> Maps template names (without .md) to vault subdirectories. Set to vim.NIL to prompt for directory.
 --- @field timestamp_templates table<string, "query"|"auto"> Maps template names (without .md) to timestamp behavior: "query" prompts the user, "auto" always suffixes.
@@ -22,6 +23,58 @@ local M = {}
 
 --- @type KaiObsidianConfig
 M.config = {
+  obsidian = {
+    legacy_commands = false,
+    workspaces = {
+      { name = "obsidian", path = vim.fn.expand("~/Documents/obsidian") },
+    },
+    picker = {
+      name = "fzf-lua",
+      note_mappings = { new = "<C-n>", insert_link = "<C-l>" },
+    },
+    attachments = { folder = "attachments" },
+    note_id_func = nil,
+    frontmatter = {
+      enabled = function(path) return not string.match(path, "%claude/") end,
+      func = function(note)
+        local out = {
+          uid = require("kai-obsidian.notes").note_id(),
+          aliases = note.aliases,
+          categories = {},
+        }
+        if note.tags ~= nil then out.tags = note.tags end
+        if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
+          for k, v in pairs(note.metadata) do
+            if k ~= "uid" or (v ~= nil and v ~= "" and v ~= vim.NIL) then
+              out[k] = v
+            end
+          end
+        end
+        return out
+      end,
+    },
+    templates = {
+      folder = "nvim-templates",
+      date_format = "%Y-%m-%d",
+      time_format = "%H:%M",
+      substitutions = {
+        id = function() return require("kai-obsidian.notes").note_id() end,
+        today_week = function() return os.date("%Y-W%V") end,
+        week_start_date = function()
+          local current_time = os.time()
+          local day_of_week_iso = tonumber(os.date("%u", current_time))
+          local days_to_subtract = day_of_week_iso - 1
+          local seconds_in_day = 60 * 60 * 24
+          local first_day_time = current_time - (days_to_subtract * seconds_in_day)
+          return os.date("%B %-e, %Y", first_day_time)
+        end,
+      },
+    },
+    completion = { min_chars = 0 },
+    checkbox = {
+      order = { " ", "x", "!", ">", "~" },
+    },
+  },
   weekly = {
     template = "weekly-tmpl",
     filename_prefix = "weekly-",
@@ -95,6 +148,8 @@ end
 --- @param opts? KaiObsidianConfig
 function M.setup(opts)
   M.config = vim.tbl_deep_extend("force", M.config, opts or {})
+
+  require("obsidian").setup(M.config.obsidian)
 
   -- Set up which-key groups if which-key is available
   local wk_ok, wk = pcall(require, "which-key")
