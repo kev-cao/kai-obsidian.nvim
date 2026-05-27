@@ -1,11 +1,11 @@
 # kai-obsidian.nvim
 
-A Neovim plugin that extends [obsidian.nvim](https://github.com/obsidian-nvim/obsidian.nvim) with opinionated workflows for note creation, weekly todos, and vault navigation.
+A Neovim plugin that extends [obsidian.nvim](https://github.com/obsidian-nvim/obsidian.nvim) with opinionated workflows for note creation, weekly notes, and vault navigation.
 
 ## Features
 
 - **Note creation** — interactive flow with directory selection, template picking, and optional timestamp suffixing
-- **Weekly todos** — create weekly todo notes from a template, automatically carrying over unchecked tasks from the previous week
+- **Weekly notes** — create weekly notes from a template, automatically carrying over unchecked tasks from the previous week
 - **Scratch notes** — quick access to a persistent scratch note in your vault
 - **Image pasting** — paste images with paths scoped to the current note's UID
 
@@ -14,7 +14,7 @@ A Neovim plugin that extends [obsidian.nvim](https://github.com/obsidian-nvim/ob
 - Neovim >= 0.9
 - [obsidian.nvim](https://github.com/obsidian-nvim/obsidian.nvim) (must be configured with at least one workspace)
 - [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
-- [fzf-lua](https://github.com/ibhagwan/fzf-lua) (for weekly todo listing)
+- [fzf-lua](https://github.com/ibhagwan/fzf-lua) (for weekly note listing)
 
 ## Installation
 
@@ -40,10 +40,13 @@ All options and their defaults:
 
 ```lua
 require("kai-obsidian").setup({
-  -- Weekly todo settings
-  weekly_todo = {
-    -- Template name used when creating a new weekly todo
-    template = "weekly-todo-tmpl",
+  -- Weekly note settings
+  weekly = {
+    -- Template name used when creating a new weekly note
+    template = "weekly-tmpl",
+    -- Filename prefix for weekly notes. The year/week suffix (e.g.
+    -- "2026w22") is appended to this prefix.
+    filename_prefix = "weekly-",
     -- Heading names whose unchecked tasks carry over to the next week.
     copyover_sections = { "Tasks", "Backlog" },
   },
@@ -52,7 +55,7 @@ require("kai-obsidian").setup({
   -- templates default to the vault root. Set a template to vim.NIL to
   -- prompt the user for a directory instead.
   template_output_dirs = {
-    ["weekly-todo-tmpl"] = "todos",
+    ["weekly-tmpl"] = "weeklies",
     ["people-tmpl"] = "people",
     ["project-tmpl"] = "projects",
     ["category-tmpl"] = "categories",
@@ -71,13 +74,13 @@ require("kai-obsidian").setup({
     -- Which-key groups
     groups = {
       { "<leader>o", group = "Obsidian", icon = { icon = "󱓧", color = "green" } },
-      { "<leader>ot", group = "Weekly Todos", icon = { icon = "", color = "green" } },
+      { "<leader>ot", group = "Weekly Notes", icon = { icon = "", color = "green" } },
     },
     -- Global keymaps
     keys = {
       open_scratch = { "<leader>os", ... },
       new_note     = { "<leader>on", ... },
-      weekly_todo  = { "<leader>ott", ... },
+      weekly       = { "<leader>ott", ... },
       list_weekly  = { "<leader>otl", ... },
     },
     -- Buffer-local keymaps for vault markdown files
@@ -96,8 +99,8 @@ require("kai-obsidian").setup({
 |-----|-------------|
 | `<leader>os` | Open scratch note |
 | `<leader>on` | Create a new note (interactive) |
-| `<leader>ott` | Go to this week's todo (creates if needed) |
-| `<leader>otl` | List all weekly todos |
+| `<leader>ott` | Go to this week's note (creates if needed) |
+| `<leader>otl` | List all weekly notes |
 
 ### Buffer-local (vault markdown files)
 
@@ -131,10 +134,10 @@ notes.open_scratch()
 notes.normalize_note_title("My Note Title")
 notes.image_path("screenshot.png")
 
--- Weekly todos
-local todos = require("kai-obsidian.todos")
-todos.goto_or_create_weekly()
-todos.list_weekly()
+-- Weekly notes
+local weekly = require("kai-obsidian.weekly")
+weekly.goto_or_create_weekly()
+weekly.list_weekly()
 
 -- Date utilities
 local date = require("kai-obsidian.date")

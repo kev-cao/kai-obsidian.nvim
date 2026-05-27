@@ -1,17 +1,18 @@
 --- @module "kai-obsidian"
 --- A lazy.nvim plugin for managing Obsidian notes with opinionated workflows
---- for note creation, weekly todos, and vault navigation.
+--- for note creation, weekly notes, and vault navigation.
 
 local M = {}
 
 --- @class KaiObsidianConfig
---- @field weekly_todo KaiObsidianWeeklyTodoConfig
+--- @field weekly KaiObsidianWeeklyConfig
 --- @field template_output_dirs table<string, string|userdata> Maps template names (without .md) to vault subdirectories. Set to vim.NIL to prompt for directory.
 --- @field timestamp_templates table<string, "query"|"auto"> Maps template names (without .md) to timestamp behavior: "query" prompts the user, "auto" always suffixes.
 --- @field keymaps KaiObsidianKeymapConfig
 
---- @class KaiObsidianWeeklyTodoConfig
---- @field template string Template name for new weekly todos
+--- @class KaiObsidianWeeklyConfig
+--- @field template string Template name for new weekly notes
+--- @field filename_prefix string Filename prefix for weekly notes (the year/week suffix is appended)
 --- @field copyover_sections string[] Heading names whose unchecked tasks carry over to the next week
 
 --- @class KaiObsidianKeymapConfig
@@ -21,12 +22,13 @@ local M = {}
 
 --- @type KaiObsidianConfig
 M.config = {
-  weekly_todo = {
-    template = "weekly-todo-tmpl",
+  weekly = {
+    template = "weekly-tmpl",
+    filename_prefix = "weekly-",
     copyover_sections = { "Tasks", "Backlog" },
   },
   template_output_dirs = {
-    ["weekly-todo-tmpl"] = "todos",
+    ["weekly-tmpl"] = "weeklies",
     ["people-tmpl"] = "people",
     ["project-tmpl"] = "projects",
     ["category-tmpl"] = "categories",
@@ -37,7 +39,7 @@ M.config = {
   keymaps = {
     groups = {
       { "<leader>o", group = "Obsidian", icon = { icon = "󱓧", color = "green" } },
-      { "<leader>ot", group = "Weekly Todos", icon = { icon = "", color = "green" } },
+      { "<leader>ot", group = "Weekly Notes", icon = { icon = "", color = "green" } },
     },
     keys = {
       open_scratch = {
@@ -52,17 +54,17 @@ M.config = {
         mode = "n",
         desc = "Create a new Obsidian note",
       },
-      weekly_todo = {
+      weekly = {
         "<leader>ott",
-        function() require("kai-obsidian.todos").goto_or_create_weekly() end,
+        function() require("kai-obsidian.weekly").goto_or_create_weekly() end,
         mode = "n",
-        desc = "Go to weekly todo",
+        desc = "Go to weekly note",
       },
       list_weekly = {
         "<leader>otl",
-        function() require("kai-obsidian.todos").list_weekly() end,
+        function() require("kai-obsidian.weekly").list_weekly() end,
         mode = "n",
-        desc = "List weekly todos",
+        desc = "List weekly notes",
       },
     },
     bufkeys = {
