@@ -52,6 +52,15 @@ M.config = {
         end
         return out
       end,
+      sort = {
+        "uid",
+        "aliases",
+        "created_at",
+        "week",
+        "people",
+        "categories",
+        "tags",
+      }
     },
     templates = {
       folder = "nvim-templates",
