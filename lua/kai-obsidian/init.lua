@@ -98,7 +98,7 @@ M.config = {
   },
   template_output_dirs = {
     ["weekly-tmpl"] = "weeklies",
-    ["people-tmpl"] = "people",
+    ["person-tmpl"] = "people",
     ["project-tmpl"] = "projects",
     ["category-tmpl"] = "categories",
   },
