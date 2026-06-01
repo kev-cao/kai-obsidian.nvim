@@ -191,10 +191,10 @@ function M.goto_or_create_weekly()
       title = filename,
       verbatim = true,
       dir = dir,
-      should_write = true,
       insert_frontmatter = false,
       template = config.weekly.template,
     })
+    note:write()
 
     vim.schedule(function()
       inject_unchecked_tasks(note_path, unchecked)

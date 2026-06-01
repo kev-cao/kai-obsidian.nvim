@@ -228,10 +228,10 @@ function M.create_new_note(opts)
       template = template,
       insert_frontmatter = template == nil,
       aliases = M.default_note_aliases(title),
-      should_write = true,
     }
     vim.tbl_extend("keep", create_opts, opts or {})
     local note = obsidian.Note.create(create_opts)
+    note:write()
     note:open({ sync = false })
   end)()
 end
@@ -251,8 +251,8 @@ function M.open_scratch()
       title = "scratch",
       verbatim = true,
       dir = vault_path,
-      should_write = true,
     })
+    note:write()
     note:open({ sync = false })
   end
 end
