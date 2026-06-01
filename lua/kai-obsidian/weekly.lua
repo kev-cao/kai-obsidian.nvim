@@ -181,7 +181,7 @@ function M.goto_or_create_weekly()
   local note_path = dir .. filename .. ".md"
   if vim.fn.filereadable(note_path) == 1 then
     local note = obsidian.Note.from_file(note_path)
-    note:open({ sync = false })
+    note:open({ sync = true })
   else
     local prev_path = last_week_path()
     local unchecked = extract_unchecked_tasks(prev_path)
@@ -195,13 +195,8 @@ function M.goto_or_create_weekly()
       template = config.weekly.template,
     })
     note:write()
-
-    vim.schedule(function()
-      inject_unchecked_tasks(note_path, unchecked)
-      vim.cmd("checktime")
-    end)
-
-    note:open({ sync = false })
+    inject_unchecked_tasks(note_path, unchecked)
+    note:open({ sync = true })
   end
 end
 

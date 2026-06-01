@@ -232,7 +232,7 @@ function M.create_new_note(opts)
     vim.tbl_extend("keep", create_opts, opts or {})
     local note = obsidian.Note.create(create_opts)
     note:write()
-    note:open({ sync = false })
+    note:open({ sync = true })
   end)()
 end
 
@@ -253,7 +253,7 @@ function M.open_scratch()
       dir = vault_path,
     })
     note:write()
-    note:open({ sync = false })
+    note:open({ sync = true })
   end
 end
 
