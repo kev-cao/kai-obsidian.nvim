@@ -10,6 +10,8 @@ local M = {}
 --- @field template_output_dirs table<string, string|userdata> Maps template names (without .md) to vault subdirectories. Set to vim.NIL to prompt for directory.
 --- @field timestamp_templates table<string, "query"|"auto"> Maps template names (without .md) to timestamp behavior: "query" prompts the user, "auto" always suffixes.
 --- @field keymaps KaiObsidianKeymapConfig
+--- @field scratch KaiScratchConfig
+--- @field backlog KaiBacklogConfig
 
 --- @class KaiObsidianWeeklyConfig
 --- @field template string Template name for new weekly notes
@@ -20,6 +22,12 @@ local M = {}
 --- @field groups table[] Which-key groups for obsidian
 --- @field keys table<string, table|false> Global keymaps (set to false to disable)
 --- @field bufkeys table<string, table|false> Buffer-local keymaps for obsidian markdown files (set to false to disable)
+
+--- @class KaiScratchConfig
+--- @field path string|fun():string Path to the scratch note, or a function that returns the path. Relative to the vault root. Defaults to "scratch.md".
+
+--- @class KaiBacklogConfig
+--- @field path string|fun():string Path to the backlog note, or a function that returns the path. Relative to the vault root. Defaults to "backlog.md".
 
 --- @type KaiObsidianConfig
 M.config = {
@@ -94,7 +102,7 @@ M.config = {
   weekly = {
     template = "weekly-tmpl",
     filename_prefix = "weekly-",
-    copyover_sections = { "Tasks", "Backlog" },
+    copyover_sections = { "Tasks" },
   },
   template_output_dirs = {
     ["weekly-tmpl"] = "weeklies",
@@ -104,6 +112,12 @@ M.config = {
   },
   timestamp_templates = {
     ["meeting-tmpl"] = "query",
+  },
+  scratch = {
+    path = "scratch.md",
+  },
+  backlog = {
+    path = "backlog.md",
   },
   keymaps = {
     groups = {
@@ -116,6 +130,12 @@ M.config = {
         function() require("kai-obsidian.notes").open_scratch() end,
         mode = "n",
         desc = "Open Obsidian scratchpad",
+      },
+      open_backlog = {
+        "<leader>ob",
+        function() require("kai-obsidian.notes").open_backlog() end,
+        mode = "n",
+        desc = "Open Obsidian backlog note",
       },
       new_note = {
         "<leader>on",
@@ -156,9 +176,9 @@ M.config = {
 
 --- Returns the canonical expanded path to the Obsidian vault, read from
 --- obsidian.nvim's global state.
---- @return string
+--- @return :bsidian.Path
 function M.vault_path()
-  return tostring(Obsidian.dir)
+  return Obsidian.dir
 end
 
 --- @param opts? KaiObsidianConfig
@@ -202,7 +222,7 @@ function M.setup(opts)
   end
 
   vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-    pattern = { vault .. "/*.md", vault .. "/**/*.md" },
+    pattern = { tostring(vault / "*.md"), tostring(vault / "**/*.md") },
     group = vim.api.nvim_create_augroup("kai_obsidian", { clear = true }),
     callback = function(ev)
       apply_bufkeys(ev.buf)
@@ -212,7 +232,7 @@ function M.setup(opts)
   -- Apply to any already-open vault buffers (setup may run after BufRead)
   for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
     local name = vim.api.nvim_buf_get_name(bufnr)
-    if vim.api.nvim_buf_is_loaded(bufnr) and name:find(vault, 1, true) == 1 and name:match("%.md$") then
+    if vim.api.nvim_buf_is_loaded(bufnr) and name:find(tostring(vault), 1, true) == 1 and name:match("%.md$") then
       apply_bufkeys(bufnr)
     end
   end

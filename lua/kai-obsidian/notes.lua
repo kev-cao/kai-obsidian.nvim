@@ -191,7 +191,7 @@ function M.create_new_note(opts)
         return
       end
     elseif mapped_dir then
-      dir = obsidian_path .. "/" .. mapped_dir
+      dir = obsidian_path / mapped_dir
     else
       dir = obsidian_path
     end
@@ -240,17 +240,40 @@ end
 function M.open_scratch()
   local plugin = require("kai-obsidian")
   local obsidian = require("obsidian")
+  local util = require("kai-obsidian.func")
   local vault_path = plugin.vault_path()
-  local scratch_path = vault_path .. "/scratch.md"
-  if vim.fn.filereadable(scratch_path) == 1 then
+  local scratch_path = vault_path / util.get_scratch_path(plugin.config)
+  if vim.fn.filereadable(tostring(scratch_path)) == 1 then
     local note = obsidian.Note.from_file(scratch_path)
     note:open({ sync = false })
   else
     local note = obsidian.Note.create({
-      id = "scratch",
-      title = "scratch",
+      id = scratch_path.stem,
+      title = scratch_path.stem,
       verbatim = true,
-      dir = vault_path,
+      dir = scratch_path:parent(),
+    })
+    note:write()
+    note:open({ sync = true })
+  end
+end
+
+--- Opens the backlog note in the Obsidian vault.
+function M.open_backlog()
+  local plugin = require("kai-obsidian")
+  local obsidian = require("obsidian")
+  local util = require("kai-obsidian.func")
+  local vault_path = plugin.vault_path()
+  local backlog_path = vault_path / util.get_backlog_path(plugin.config)
+  if vim.fn.filereadable(tostring(backlog_path)) == 1 then
+    local note = obsidian.Note.from_file(backlog_path)
+    note:open({ sync = false })
+  else
+    local note = obsidian.Note.create({
+      id = backlog_path.stem,
+      title = backlog_path.stem,
+      verbatim = true,
+      dir = backlog_path:parent(),
     })
     note:write()
     note:open({ sync = true })
