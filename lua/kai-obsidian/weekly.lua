@@ -2,15 +2,11 @@
 --- Weekly note management for Obsidian vaults.
 
 local M = {}
+local plugin = require("kai-obsidian")
 
 --- @return table The plugin config
 local function cfg()
   return require("kai-obsidian").config
-end
-
---- @return string The expanded vault path
-local function vault_path()
-  return require("kai-obsidian").vault_path()
 end
 
 --- Returns the heading level of a line, or nil if not a heading.
@@ -31,7 +27,7 @@ end
 
 --- Computes the file path for the weekly note for a given date.
 --- @param date string The date in "YYYY-MM-DD" format.
---- @return string The file path for the weekly note.
+--- @return obsidian.Path The file path for the weekly note.
 local function weekly_path(date)
   local year, month, day = string.match(date, "^(%d%d%d%d)%-(%d%d)%-(%d%d)$")
   year = tonumber(year)
@@ -40,16 +36,16 @@ local function weekly_path(date)
   local time = os.time({ year = year, month = month, day = day })
   local week = tostring(os.date("%Yw%V", time))
   local filename = cfg().weekly.filename_prefix .. week
-  return vault_path() .. "/" .. weekly_dir() .. "/" .. filename .. ".md"
+  return plugin.vault_path() / weekly_dir() / (filename .. ".md")
 end
 
 --- Computes the file path for last week's note.
---- @return string
+--- @return obsidian.Path
 local function last_week_path()
   local one_week_ago = os.time() - (7 * 24 * 60 * 60)
   local week = tostring(os.date("%Yw%V", one_week_ago))
   local filename = cfg().weekly.filename_prefix .. week
-  return vault_path() .. "/" .. weekly_dir() .. "/" .. filename .. ".md"
+  return plugin.vault_path() / weekly_dir() / (filename .. ".md")
 end
 
 --- Builds a set from the copyover_sections array for O(1) lookup.
@@ -177,13 +173,13 @@ function M.goto_or_create_weekly()
   local obsidian = require("obsidian")
   local config = cfg()
   local filename = config.weekly.filename_prefix .. os.date("%Yw%V")
-  local dir = vault_path() .. "/" .. weekly_dir() .. "/"
-  local note_path = dir .. filename .. ".md"
+  local dir = plugin.vault_path() / weekly_dir()
+  local note_path = tostring(dir / (filename .. ".md"))
   if vim.fn.filereadable(note_path) == 1 then
     local note = obsidian.Note.from_file(note_path)
     note:open({ sync = true })
   else
-    local prev_path = last_week_path()
+    local prev_path = tostring(last_week_path())
     local unchecked = extract_unchecked_tasks(prev_path)
 
     local note = obsidian.Note.create({
@@ -204,12 +200,12 @@ end
 function M.list_weekly()
   local date_util = require("kai-obsidian.date")
   local obsidian = require("obsidian")
-  local dir_path = vault_path() .. "/" .. weekly_dir() .. "/"
+  local dir_path = plugin.vault_path() / weekly_dir()
   local prefix = cfg().weekly.filename_prefix
   local dates = {}
   local date_to_file = {}
   for _, file in ipairs(vim.fn.globpath(
-    dir_path, prefix .. "*.md", false, true
+    tostring(dir_path), prefix .. "*.md", false, true
   )) do
     local filename = vim.fn.fnamemodify(file, ":t:r")
     local year_week = filename:sub(#prefix + 1)
@@ -231,7 +227,7 @@ function M.list_weekly()
   end
   function weekly_previewer:parse_entry(entry)
     return {
-      path = weekly_path(entry),
+      path = tostring(weekly_path(entry)),
       line = 1,
       col = 1,
     }
