@@ -43,7 +43,7 @@ M.config = {
     attachments = { folder = "attachments" },
     note_id_func = nil,
     frontmatter = {
-      enabled = function(path) return not string.match(path, "%claude/") end,
+      enabled = function(path) return not path:match("claude/") end,
       func = function(note)
         local out = {
           uid = require("kai-obsidian.notes").note_id(),
